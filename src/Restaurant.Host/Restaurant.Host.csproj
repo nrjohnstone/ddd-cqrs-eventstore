@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssistantManager.cs" />
+    <Compile Include="Cook.cs" />
     <Compile Include="IOrderHandler.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="OrderFactory.cs" />
@@ -53,6 +55,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Restaurant.Tests\Restaurant.Tests.csproj">
+      <Project>{4AB1DAEE-4D4A-4E96-A0CB-01513F990C58}</Project>
+      <Name>Restaurant.Tests</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

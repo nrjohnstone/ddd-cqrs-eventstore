@@ -1,17 +1,19 @@
-﻿namespace Restaurant.Host
+﻿using Restaurant.Tests;
+
+namespace Restaurant.Host
 {
     internal class Waiter
     {
-        private readonly PrinterHandler _printerHandler;
+        private readonly IOrderHandler _nextHandler;
 
-        public Waiter(PrinterHandler printerHandler)
+        public Waiter(IOrderHandler nextHandler)
         {
-            _printerHandler = printerHandler;
+            _nextHandler = nextHandler;
         }
 
-        public void PlaceOrder(Order order)
+        public void PlaceOrder(RestaurantDocument order)
         {
-            _printerHandler.Handle(order);
+            _nextHandler.Handle(order);
         }
     }
 }

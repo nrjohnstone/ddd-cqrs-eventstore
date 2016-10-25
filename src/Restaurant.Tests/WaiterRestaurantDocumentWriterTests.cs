@@ -16,7 +16,7 @@ namespace Restaurant.Tests
         [Fact]
         public void CanCreateInstance()
         {
-            var restaurantDocument = new RestaurantDocument();
+            var restaurantDocument = new RestaurantDocument("1");
             
             var sut = CreateSut(JsonConvert.SerializeObject(restaurantDocument));
 
@@ -27,7 +27,7 @@ namespace Restaurant.Tests
         public void TableNumberGetter_ShouldReturnValueFromJson()
         {
             int expectedTableNumber = 10;
-            var restaurantDocument = new RestaurantDocument()
+            var restaurantDocument = new RestaurantDocument("1")
             {
                 TableNumber = expectedTableNumber
             };
@@ -41,7 +41,7 @@ namespace Restaurant.Tests
         public void TableNumberSetter_ShouldUpdateValueFromJson()
         {
             int expectedTableNumber = 10;
-            var restaurantDocument = new RestaurantDocument()
+            var restaurantDocument = new RestaurantDocument("1")
             {
                 TableNumber = expectedTableNumber - 1
             };
@@ -57,7 +57,7 @@ namespace Restaurant.Tests
         public void ItemsGetter_ShouldReturnJson()
         {
             Item item = new Item("Pizza");
-            var restaurantDocument = new RestaurantDocument();
+            var restaurantDocument = new RestaurantDocument("1");
             restaurantDocument.Items.Add(item);
            
             var sut = CreateSut(JsonConvert.SerializeObject(restaurantDocument));
@@ -69,7 +69,7 @@ namespace Restaurant.Tests
         public void AddItems_ShouldUpdateJson()
         {
             Item item = new Item("Pizza");
-            var restaurantDocument = new RestaurantDocument();
+            var restaurantDocument = new RestaurantDocument("1");
             restaurantDocument.Items.Add(item);
 
             var sut = CreateSut(JsonConvert.SerializeObject(restaurantDocument));
@@ -83,7 +83,7 @@ namespace Restaurant.Tests
         public void TimeToCookMsGetter_ShouldReturnFromJson()
         {
             int expectedTimeToCook = 300;
-            var restaurantDocument = new RestaurantDocument()
+            var restaurantDocument = new RestaurantDocument("1")
             {
                 TimeToCookMs = 300
             };
@@ -97,7 +97,7 @@ namespace Restaurant.Tests
         public void TimeToCookMsSetter_ShouldUpdateFromJson()
         {
             int expectedTimeToCook = 300;
-            var restaurantDocument = new RestaurantDocument()
+            var restaurantDocument = new RestaurantDocument("1")
             {
                 TimeToCookMs = 300
             };
@@ -112,7 +112,7 @@ namespace Restaurant.Tests
         public void TaxGetter_ShouldReturnFromJson()
         {
             double expectedTax = 2.00;
-            var restaurantDocument = new RestaurantDocument()
+            var restaurantDocument = new RestaurantDocument("1")
             {
                 Tax = 2.00
             };
@@ -126,7 +126,7 @@ namespace Restaurant.Tests
         public void TaxSetter_ShouldUpdateUpdate()
         {
             double expectedTax = 2.00;
-            var restaurantDocument = new RestaurantDocument()
+            var restaurantDocument = new RestaurantDocument("1")
             {
                 Tax = 2.00
             };
@@ -140,7 +140,7 @@ namespace Restaurant.Tests
         [Fact]
         public void ToJsonString_ShouldReturnCorrectJson()
         {
-            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument());
+            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument("1"));
             var sut = CreateSut(originalJson);
 
             string expectedJson = JObject.Parse(originalJson).ToString();
@@ -150,14 +150,14 @@ namespace Restaurant.Tests
         [Fact]
         public void WhenPropertyModified_ToJsonString_ShouldReturnCorrectJson()
         {
-            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument()
+            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
             {
                 TableNumber = 4
             });
             var sut = CreateSut(originalJson);
 
             sut.TableNumber = 5;
-            var expectedJson = JsonConvert.SerializeObject(new RestaurantDocument()
+            var expectedJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
             {
                 TableNumber = 5
             });
@@ -168,7 +168,7 @@ namespace Restaurant.Tests
         [Fact]
         public void WhenJsonContainsUnknownProperties_ShouldNotBeLost()
         {
-            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument()
+            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
             {
                 TableNumber = 4
             });
@@ -188,6 +188,7 @@ namespace Restaurant.Tests
     public class Item
     {
         public string Description { get; set; }
+        public int Price { get; set; }
 
         public Item(string description)
         {

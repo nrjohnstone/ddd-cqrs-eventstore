@@ -4,6 +4,7 @@ namespace Restaurant.Tests
 {
     public class RestaurantDocument
     {
+        public string Id { get; }
         public int TableNumber { get; set; }
         public int TimeToCookMs { get; set; }
         public double Tax { get; set; }
@@ -12,9 +13,11 @@ namespace Restaurant.Tests
         public double Total { get; set; }
         public double Paid { get; set; }
 
-        public RestaurantDocument()
+        public RestaurantDocument(string id)
         {
+            Id = id;
             Items = new List<Item>();
+            Ingredients = new List<string>();
         }
     }
 }

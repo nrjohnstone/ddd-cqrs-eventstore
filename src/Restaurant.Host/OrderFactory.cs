@@ -1,25 +1,35 @@
+using Restaurant.Tests;
+
 namespace Restaurant.Host
 {
     internal class OrderFactory
     {
-        public static Order FishAndChips()
+        public static RestaurantDocument FishAndChips()
         {
-            return new Order("Fish & Chips");
+            var order = new RestaurantDocument("1");
+            order.Items.Add(new Item("Fish and Chips"));
+            return order;
         }
 
-        public static Order Hamburger()
+        public static RestaurantDocument Hamburger()
         {
-            return new Order("Hamburger");
+            var order = new RestaurantDocument("2");
+            order.Items.Add(new Item("Hamburger"));
+            return order;
         }
 
-        public static Order Haggis()
+        public static RestaurantDocument Haggis()
         {
-            return new Order("Haggis");
+            var order = new RestaurantDocument("3");
+            order.Items.Add(new Item("Haggis"));
+            return order;
         }
 
-        public static Order Kapsalon()
+        public static RestaurantDocument Kapsalon()
         {
-            return new Order("Kapsalon");
+            var order = new RestaurantDocument("4");
+            order.Items.Add(new Item("Kapsalon"));
+            return order;
         }
     }
 }
