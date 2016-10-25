@@ -6,6 +6,7 @@ using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using Restaurant.Host.Actors;
 using Restaurant.Host.Dispatchers;
 
 namespace Restaurant.Host

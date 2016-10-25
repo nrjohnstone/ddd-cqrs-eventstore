@@ -43,9 +43,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssistantManager.cs" />
-    <Compile Include="Cashier.cs" />
-    <Compile Include="Cook.cs" />
+    <Compile Include="Actors\AssistantManager.cs" />
+    <Compile Include="Actors\Cashier.cs" />
+    <Compile Include="Actors\Cook.cs" />
     <Compile Include="Dispatchers\Fanout.cs" />
     <Compile Include="Dispatchers\BalancedRoundRobin.cs" />
     <Compile Include="Dispatchers\RoundRobin.cs" />
@@ -61,7 +61,7 @@
     <Compile Include="QueueMonitor.cs" />
     <Compile Include="QueueThreadHandler.cs" />
     <Compile Include="RestaurantDocument.cs" />
-    <Compile Include="Waiter.cs" />
+    <Compile Include="Actors\Waiter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

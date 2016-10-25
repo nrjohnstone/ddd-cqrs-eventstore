@@ -1,8 +1,7 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 
-namespace Restaurant.Host
+namespace Restaurant.Host.Actors
 {
     internal class AssistantManager : IOrderHandler
     {

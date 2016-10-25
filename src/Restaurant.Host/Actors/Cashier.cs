@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 
-namespace Restaurant.Host
+namespace Restaurant.Host.Actors
 {
     internal class Cashier : IOrderHandler
     {

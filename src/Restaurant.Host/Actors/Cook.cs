@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
 
-namespace Restaurant.Host
+namespace Restaurant.Host.Actors
 {
     internal class Cook : IOrderHandler
     {
