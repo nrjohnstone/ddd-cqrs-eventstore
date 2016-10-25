@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
+using Restaurant.Host.Actors;
 using Restaurant.Host.Dispatchers;
+using Restaurant.Host.Documents;
+using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host
 {
@@ -14,39 +12,59 @@ namespace Restaurant.Host
     {
         private static Random _random;
         private static List<IStartable> _startables;
+        private static TimeToLiveHandler<OrderPlaced> _cookBob;
+        private static TimeToLiveHandler<OrderPlaced> _cookPaco;
+        private static TimeToLiveHandler<OrderPlaced> _cookSteve;
+        private static TopicPublisher _publisher;
 
         static void Main(string[] args)
         {
             _random = new Random();
             _startables = new List<IStartable>();
+            _publisher = new TopicPublisher();
 
-            IOrderHandler printerHandler = new PrinterHandler();
+            var printerHandler = new PrinterHandler();
 
-            var cashier = new Cashier(printerHandler);
+            var cashier = new Cashier(_publisher);
 
-            var cashierThread = CreateQueueThreadHandler(cashier);
+            var cashierQueue = CreateQueueThreadHandler(cashier);
 
-            IOrderHandler asstManager = new AssistantManager(cashierThread);
+            var asstManager = new AssistantManager(_publisher);
 
-            var cookHandlers = CreateCooks(asstManager);
+            var cookHandlers = CreateCooks();
 
-            IOrderHandler dispatcher = new BalancedRoundRobin(cookHandlers);
-            var dispatcherQueueThread = new QueueThreadHandler(dispatcher);
-            _startables.Add(dispatcherQueueThread);
-            var waiter = new Waiter(dispatcherQueueThread);
+            var dispatcher = new BalancedRoundRobin<OrderPlaced>(cookHandlers);
+            var cooksDispatcherQueue = new MonitorableQueueThreadHandler<OrderPlaced>(dispatcher);
+            
+            _startables.Add(cooksDispatcherQueue);
 
-            List<QueueThreadHandler> queuesToMonitor = new List<QueueThreadHandler>();
+            var waiter = new Waiter(_publisher);
+
+            var queuesToMonitor = new List<IMonitorableQueue>();
             queuesToMonitor.AddRange(cookHandlers);
-            queuesToMonitor.Add(dispatcherQueueThread);
+            queuesToMonitor.Add(cooksDispatcherQueue);
             var queueMonitor = new QueueMonitor(queuesToMonitor);
             _startables.Add(queueMonitor);
-            
+
+            // Subscriptions
+            _publisher.Subscribe(cooksDispatcherQueue);
+            _publisher.Subscribe(asstManager);
+            _publisher.Subscribe(cashierQueue);
+            _publisher.Subscribe(printerHandler);
+
             _startables.ForEach(x => x.Start());
 
-            PlaceOrders(waiter, 100);
+            bool shutdown = false;
+            int ordersCreated = 0;
 
-            while (true)
+            while (!shutdown)
             {
+                if (ordersCreated < 100)
+                {
+                    PlaceOrders(waiter, 5);
+                    ordersCreated += 5;
+                }
+                
                 var outstandingOrders = cashier.GetOutstandingOrders();
 
                 PrintOutstandingOrders(outstandingOrders);
@@ -58,32 +76,49 @@ namespace Restaurant.Host
                 
                 var outstandingOrdersAfterPay = cashier.GetOutstandingOrders();
                 PrintOutstandingOrders(outstandingOrdersAfterPay);
+                PrintDroppedMessages();
+                Thread.Sleep(100);
             }
         }
 
-        private static QueueThreadHandler[] CreateCooks(IOrderHandler asstManager)
+        private static void PrintDroppedMessages()
         {
-            var cookBob = new Cook("Bob", asstManager,
-                GetRandomCookingTime());
+            var totalOrdersDropped = 
+                _cookBob.TotalOrdersDropped +
+                _cookPaco.TotalOrdersDropped +
+                _cookSteve.TotalOrdersDropped;
+            Console.WriteLine($"Total dropped messages {totalOrdersDropped}");
+            Console.WriteLine($"Bob dropped messages {_cookBob.TotalOrdersDropped}");
+            Console.WriteLine($"Paco dropped messages {_cookPaco.TotalOrdersDropped}");
+            Console.WriteLine($"Steve dropped messages {_cookSteve.TotalOrdersDropped}");
+        }
 
-            var cookPaco = new Cook("Paco", asstManager,
-                GetRandomCookingTime());
+        private static MonitorableQueueThreadHandler<OrderPlaced>[] CreateCooks()
+        {
+            _cookBob = new TimeToLiveHandler<OrderPlaced>(
+                new Cook("Bob",
+                10, _publisher));
 
-            var cookSteve = new Cook("Steve", asstManager,
-                GetRandomCookingTime());
+            _cookPaco = new TimeToLiveHandler<OrderPlaced>(
+                new Cook("Paco",
+                499, _publisher));
+
+            _cookSteve = new TimeToLiveHandler<OrderPlaced>(
+                new Cook("Steve",
+                1500, _publisher));
 
             var queueThreadHandlers = new[]
             {
-                CreateQueueThreadHandler(cookBob),
-                CreateQueueThreadHandler(cookPaco),
-                CreateQueueThreadHandler(cookSteve)
+                CreateQueueThreadHandler(_cookBob),
+                CreateQueueThreadHandler(_cookPaco),
+                CreateQueueThreadHandler(_cookSteve)
             };
             return queueThreadHandlers;
         }
 
-        private static QueueThreadHandler CreateQueueThreadHandler(IOrderHandler cashier)
+        private static MonitorableQueueThreadHandler<T> CreateQueueThreadHandler<T>(IOrderHandler<T> cashier) where T : MessageBase
         {
-            var cashierThread = new QueueThreadHandler(cashier);
+            var cashierThread = new MonitorableQueueThreadHandler<T>(cashier);
             _startables.Add(cashierThread);
             return cashierThread;
         }
@@ -108,5 +143,10 @@ namespace Restaurant.Host
                 Console.WriteLine($"Outstanding order {order.Id}");
             }
         }
+    }
+
+    public static class Events
+    {
+        public const string OrderCreated = nameof(Events.OrderCreated);
     }
 }

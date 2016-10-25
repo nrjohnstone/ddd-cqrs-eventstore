@@ -1,36 +1,20 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Host.Dispatchers
 {
-    internal class BalancedRoundRobin : IOrderHandler
+    internal class BalancedRoundRobin<T> : IOrderHandler<T> where T : MessageBase
     {
-        private readonly IEnumerable<QueueThreadHandler> _queueThreadHandlers;
+        private readonly IEnumerable<MonitorableQueueThreadHandler<T>> _queueThreadHandlers;
 
-        public BalancedRoundRobin(IEnumerable<QueueThreadHandler> queueThreadHandlers)
+        public BalancedRoundRobin(IEnumerable<MonitorableQueueThreadHandler<T>> queueThreadHandlers)
         {
             _queueThreadHandlers = queueThreadHandlers;
         }
 
-        public void Handle(RestaurantDocument order)
-        {
-            while (true)
-            {
-                IOrderHandler nextValidHander =
-                    GetNextAvailableHandler();
-
-                if (nextValidHander != null)
-                {
-                    nextValidHander.Handle(order);
-                    break;
-                }
-
-                Thread.Sleep(1);
-            }
-        }
-
-        private IOrderHandler GetNextAvailableHandler()
+        private IOrderHandler<T> GetNextAvailableHandler()
         {
             foreach (var queueThreadHandler in _queueThreadHandlers)
             {
@@ -39,6 +23,23 @@ namespace Restaurant.Host.Dispatchers
             }
 
             return null;
+        }
+
+        public void Handle(T message)
+        {
+            while (true)
+            {
+                IOrderHandler<T> nextValidHander =
+                    GetNextAvailableHandler();
+
+                if (nextValidHander != null)
+                {
+                    nextValidHander.Handle(message);
+                    break;
+                }
+
+                Thread.Sleep(1);
+            }
         }
     }
 }

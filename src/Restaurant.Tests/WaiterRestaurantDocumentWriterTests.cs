@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Restaurant.Host;
+using Restaurant.Host.Documents;
 using Xunit;
 
 namespace Restaurant.Tests

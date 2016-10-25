@@ -1,7 +1,18 @@
+using Restaurant.Host.Documents;
+
 namespace Restaurant.Host
 {
-    internal interface IOrderHandler
+    internal interface IOrderHandler<T>
     {
-        void Handle(RestaurantDocument order);
+        void Handle(T message);
+    }
+
+    internal class MessageBase
+    {
+        public MessageBase()
+        {
+        }
+
+        public string Id { get; protected set; }
     }
 }

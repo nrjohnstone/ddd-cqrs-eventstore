@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Restaurant.Host;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Tests
 {

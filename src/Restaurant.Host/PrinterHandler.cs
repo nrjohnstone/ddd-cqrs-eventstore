@@ -1,12 +1,16 @@
 ﻿using System;
 using System.Collections;
+using Restaurant.Host.Actors;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Host
 {
-    internal class PrinterHandler : IOrderHandler
+    internal class PrinterHandler : IOrderHandler<OrderSpiked>
     {
-        public void Handle(RestaurantDocument order)
+        public void Handle(OrderSpiked message)
         {
+            RestaurantDocument order = message.Order;
+
             foreach (var item in order.Items)
             {
                 Console.WriteLine($"{item.Description}  ${item.Price}");
@@ -22,7 +26,6 @@ namespace Restaurant.Host
             {
                 
             }
-            
 
             Console.WriteLine($"Tax: {order.Tax}");
             Console.WriteLine($"Total: {order.Total}");

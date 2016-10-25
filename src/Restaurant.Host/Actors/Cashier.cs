@@ -1,29 +1,20 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
+using Restaurant.Host.Documents;
+using Restaurant.Host.Publishers;
 
-namespace Restaurant.Host
+namespace Restaurant.Host.Actors
 {
-    internal class Cashier : IOrderHandler
+    internal class Cashier : IOrderHandler<OrderPriced>
     {
-        private readonly IOrderHandler _nextHandler;
+        private readonly IPublisher _publisher;
         private readonly ConcurrentDictionary<string, RestaurantDocument> _unpaidOrders;
 
-        public Cashier(IOrderHandler nextHandler)
+        public Cashier(IPublisher publisher)
         {
-            _nextHandler = nextHandler;
+            _publisher = publisher;
             _unpaidOrders = new ConcurrentDictionary<string, RestaurantDocument>();
-        }
-
-        public void Handle(RestaurantDocument order)
-        {
-            bool orderHandler = false;
-            while (!orderHandler)
-            {
-                orderHandler = _unpaidOrders.TryAdd(order.Id, order);
-            }
-            _nextHandler.Handle(order);
         }
 
         public void Pay(string id)
@@ -41,6 +32,18 @@ namespace Restaurant.Host
         public RestaurantDocument[] GetOutstandingOrders()
         {
             return _unpaidOrders.Values.ToArray();
+        }
+
+        public void Handle(OrderPriced message)
+        {
+            RestaurantDocument order = message.Order;
+
+            bool orderHandler = false;
+            while (!orderHandler)
+            {
+                orderHandler = _unpaidOrders.TryAdd(order.Id, order);
+            }
+            _publisher.Publish(new OrderSpiked(order));
         }
     }
 }

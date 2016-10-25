@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
-namespace Restaurant.Host
+namespace Restaurant.Host.Documents
 {
-    public class RestaurantDocument
+    public class RestaurantDocument : ITimeToLive
     {
         public string Id { get; }
         public int TableNumber { get; set; }
@@ -13,11 +14,14 @@ namespace Restaurant.Host
         public double Total { get; set; }
         public double Paid { get; set; }
 
-        public RestaurantDocument(string id)
+        public RestaurantDocument(string id, int timeToLiveMs = 5000)
         {
             Id = id;
             Items = new List<Item>();
             Ingredients = new List<string>();
+            TimeToLive = DateTime.Now + TimeSpan.FromMilliseconds(timeToLiveMs);
         }
+
+        public DateTime TimeToLive { get; }
     }
 }

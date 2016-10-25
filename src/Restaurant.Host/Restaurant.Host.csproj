@@ -43,28 +43,41 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AssistantManager.cs" />
-    <Compile Include="Cashier.cs" />
-    <Compile Include="Cook.cs" />
+    <Compile Include="Actors\AssistantManager.cs" />
+    <Compile Include="Actors\Cashier.cs" />
+    <Compile Include="Actors\Cook.cs" />
+    <Compile Include="Actors\OrderCooked.cs" />
+    <Compile Include="Actors\OrderPlaced.cs" />
+    <Compile Include="Actors\OrderPriced.cs" />
+    <Compile Include="Actors\OrderSpiked.cs" />
     <Compile Include="Dispatchers\Fanout.cs" />
     <Compile Include="Dispatchers\BalancedRoundRobin.cs" />
     <Compile Include="Dispatchers\RoundRobin.cs" />
-    <Compile Include="Ingredient.cs" />
+    <Compile Include="Documents\Ingredient.cs" />
+    <Compile Include="Documents\ITimeToLive.cs" />
     <Compile Include="IOrderHandler.cs" />
     <Compile Include="IStartable.cs" />
-    <Compile Include="Item.cs" />
-    <Compile Include="Order.cs" />
+    <Compile Include="Documents\Item.cs" />
     <Compile Include="OrderFactory.cs" />
     <Compile Include="PrinterHandler.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Publishers\IPublisher.cs" />
+    <Compile Include="Publishers\TopicPublisher.cs" />
     <Compile Include="QueueMonitor.cs" />
     <Compile Include="QueueThreadHandler.cs" />
-    <Compile Include="RestaurantDocument.cs" />
-    <Compile Include="Waiter.cs" />
+    <Compile Include="Documents\RestaurantDocument.cs" />
+    <Compile Include="Actors\Waiter.cs" />
+    <Compile Include="TimeToLiveHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\processManager.Tests\processManager.Tests.csproj">
+      <Project>{80F5AEAD-CD89-45D1-82FC-28E914F3D6E9}</Project>
+      <Name>processManager.Tests</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
