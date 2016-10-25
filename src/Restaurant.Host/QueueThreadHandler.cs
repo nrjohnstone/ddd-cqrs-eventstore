@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using Restaurant.Tests;
 
@@ -33,7 +34,10 @@ namespace Restaurant.Host
                     RestaurantDocument order;
                     _orderQueue.TryDequeue(out order);
                     if (order != null)
+                    {
+                        Console.WriteLine($"Handling order {order.Id}");
                         _orderHandler.Handle(order);
+                    }
                 }
             });
             _thread.Name = $"Thread_{_thread.ManagedThreadId}";
