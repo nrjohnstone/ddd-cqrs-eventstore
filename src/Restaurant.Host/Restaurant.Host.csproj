@@ -47,6 +47,7 @@
     <Compile Include="Cashier.cs" />
     <Compile Include="Cook.cs" />
     <Compile Include="Dispatchers\Fanout.cs" />
+    <Compile Include="Dispatchers\BalancedRoundRobin.cs" />
     <Compile Include="Dispatchers\RoundRobin.cs" />
     <Compile Include="IOrderHandler.cs" />
     <Compile Include="IStartable.cs" />

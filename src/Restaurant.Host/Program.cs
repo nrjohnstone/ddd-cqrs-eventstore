@@ -31,10 +31,15 @@ namespace Restaurant.Host
 
             var cookHandlers = CreateCooks(asstManager);
 
-            IOrderHandler dispatcher = new RoundRobin(cookHandlers);
-            var waiter = new Waiter(dispatcher);
+            IOrderHandler dispatcher = new BalancedRoundRobin(cookHandlers);
+            var dispatcherQueueThread = new QueueThreadHandler(dispatcher);
+            _startables.Add(dispatcherQueueThread);
+            var waiter = new Waiter(dispatcherQueueThread);
 
-            var queueMonitor = new QueueMonitor(cookHandlers);
+            List<QueueThreadHandler> queuesToMonitor = new List<QueueThreadHandler>();
+            queuesToMonitor.AddRange(cookHandlers);
+            queuesToMonitor.Add(dispatcherQueueThread);
+            var queueMonitor = new QueueMonitor(queuesToMonitor);
             _startables.Add(queueMonitor);
             
             _startables.ForEach(x => x.Start());
