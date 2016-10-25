@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Restaurant.Tests;
 
@@ -8,10 +9,10 @@ namespace Restaurant.Host.Dispatchers
     {
         private readonly Queue<IOrderHandler> _handlerQueue;
 
-        public RoundRobin(IOrderHandler[] orderHandlers)
+        public RoundRobin(IEnumerable orderHandlers)
         {
             _handlerQueue = new Queue<IOrderHandler>();
-            foreach (var orderHandler in orderHandlers)
+            foreach (IOrderHandler orderHandler in orderHandlers)
             {
                 _handlerQueue.Enqueue(orderHandler);
             }
@@ -35,4 +36,5 @@ namespace Restaurant.Host.Dispatchers
             }
         }
     }
+    
 }

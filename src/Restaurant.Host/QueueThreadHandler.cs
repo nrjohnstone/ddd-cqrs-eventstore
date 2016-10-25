@@ -8,6 +8,7 @@ namespace Restaurant.Host
     {
         private readonly IOrderHandler _orderHandler;
         private readonly ConcurrentQueue<RestaurantDocument> _orderQueue;
+        private Thread _thread;
 
         public QueueThreadHandler(IOrderHandler orderHandler)
         {
@@ -20,9 +21,12 @@ namespace Restaurant.Host
             _orderQueue.Enqueue(order);
         }
 
+        public int Count => _orderQueue.Count;
+        public string Name => _thread.Name;
+
         public void Start()
         {
-            var thread = new Thread(() =>
+            _thread = new Thread(() =>
             {
                 while (true)
                 {
@@ -32,7 +36,8 @@ namespace Restaurant.Host
                         _orderHandler.Handle(order);
                 }
             });
-            thread.Start();
+            _thread.Name = $"Thread_{_thread.ManagedThreadId}";
+            _thread.Start();
         }
     }
 }
