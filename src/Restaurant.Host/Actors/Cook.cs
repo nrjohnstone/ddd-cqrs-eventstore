@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Host.Actors
 {
@@ -25,9 +26,11 @@ namespace Restaurant.Host.Actors
             order.TimeToCookMs = 500;
 
             WaitForMealToBeCooked();
-
+            MealsCooked++;
             _nextHandler.Handle(order);
         }
+
+        public int MealsCooked { get; private set; }
 
         private void WaitForMealToBeCooked()
         {

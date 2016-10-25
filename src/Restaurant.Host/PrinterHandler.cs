@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Host
 {

@@ -5,9 +5,11 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Restaurant.Host.Actors;
 using Restaurant.Host.Dispatchers;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Host
 {
@@ -15,6 +17,10 @@ namespace Restaurant.Host
     {
         private static Random _random;
         private static List<IStartable> _startables;
+        private static TimeToLiveHandler _dispatcherTtl;
+        private static TimeToLiveHandler _cookBob;
+        private static TimeToLiveHandler _cookPaco;
+        private static TimeToLiveHandler _cookSteve;
 
         static void Main(string[] args)
         {
@@ -34,7 +40,9 @@ namespace Restaurant.Host
             IOrderHandler dispatcher = new BalancedRoundRobin(cookHandlers);
             var dispatcherQueueThread = new QueueThreadHandler(dispatcher);
             _startables.Add(dispatcherQueueThread);
-            var waiter = new Waiter(dispatcherQueueThread);
+
+           _dispatcherTtl = new TimeToLiveHandler(dispatcherQueueThread);
+            var waiter = new Waiter(_dispatcherTtl);
 
             List<QueueThreadHandler> queuesToMonitor = new List<QueueThreadHandler>();
             queuesToMonitor.AddRange(cookHandlers);
@@ -44,10 +52,17 @@ namespace Restaurant.Host
             
             _startables.ForEach(x => x.Start());
 
-            PlaceOrders(waiter, 100);
+            bool shutdown = false;
+            int ordersCreated = 0;
 
-            while (true)
+            while (!shutdown)
             {
+                if (ordersCreated < 100)
+                {
+                    PlaceOrders(waiter, 5);
+                    ordersCreated += 5;
+                }
+                
                 var outstandingOrders = cashier.GetOutstandingOrders();
 
                 PrintOutstandingOrders(outstandingOrders);
@@ -59,25 +74,43 @@ namespace Restaurant.Host
                 
                 var outstandingOrdersAfterPay = cashier.GetOutstandingOrders();
                 PrintOutstandingOrders(outstandingOrdersAfterPay);
+                PrintDroppedMessages();
+                Thread.Sleep(100);
             }
+        }
+
+        private static void PrintDroppedMessages()
+        {
+            var totalOrdersDropped = 
+                _dispatcherTtl.TotalOrdersDropped +
+                _cookBob.TotalOrdersDropped +
+                _cookPaco.TotalOrdersDropped +
+                _cookSteve.TotalOrdersDropped;
+            Console.WriteLine($"Total dropped messages {totalOrdersDropped}");
+            Console.WriteLine($"Bob dropped messages {_cookBob.TotalOrdersDropped}");
+            Console.WriteLine($"Paco dropped messages {_cookPaco.TotalOrdersDropped}");
+            Console.WriteLine($"Steve dropped messages {_cookSteve.TotalOrdersDropped}");
         }
 
         private static QueueThreadHandler[] CreateCooks(IOrderHandler asstManager)
         {
-            var cookBob = new Cook("Bob", asstManager,
-                GetRandomCookingTime());
+            _cookBob = new TimeToLiveHandler(
+                new Cook("Bob", asstManager,
+                10));
 
-            var cookPaco = new Cook("Paco", asstManager,
-                GetRandomCookingTime());
+            _cookPaco = new TimeToLiveHandler(
+                new Cook("Paco", asstManager,
+                499));
 
-            var cookSteve = new Cook("Steve", asstManager,
-                GetRandomCookingTime());
+            _cookSteve = new TimeToLiveHandler(
+                new Cook("Steve", asstManager,
+                1500));
 
             var queueThreadHandlers = new[]
             {
-                CreateQueueThreadHandler(cookBob),
-                CreateQueueThreadHandler(cookPaco),
-                CreateQueueThreadHandler(cookSteve)
+                CreateQueueThreadHandler(_cookBob),
+                CreateQueueThreadHandler(_cookPaco),
+                CreateQueueThreadHandler(_cookSteve)
             };
             return queueThreadHandlers;
         }

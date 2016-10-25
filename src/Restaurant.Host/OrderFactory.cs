@@ -1,3 +1,5 @@
+using Restaurant.Host.Documents;
+
 namespace Restaurant.Host
 {
     internal class OrderFactory
@@ -8,6 +10,7 @@ namespace Restaurant.Host
         {
             return (++_nextId).ToString();
         }
+
         public static RestaurantDocument FishAndChips()
         {
             var order = new RestaurantDocument(GetNextId());

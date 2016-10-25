@@ -1,3 +1,5 @@
+using Restaurant.Host.Documents;
+
 namespace Restaurant.Host.Dispatchers
 {
     internal class Fanout : IOrderHandler

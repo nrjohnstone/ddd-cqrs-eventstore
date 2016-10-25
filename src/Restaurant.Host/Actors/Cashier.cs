@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using Restaurant.Host.Documents;
 
 namespace Restaurant.Host.Actors
 {

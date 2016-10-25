@@ -1,4 +1,6 @@
-﻿namespace Restaurant.Host.Actors
+﻿using Restaurant.Host.Documents;
+
+namespace Restaurant.Host.Actors
 {
     internal class Waiter
     {

@@ -1,3 +1,5 @@
+using Restaurant.Host.Documents;
+
 namespace Restaurant.Host
 {
     internal interface IOrderHandler
