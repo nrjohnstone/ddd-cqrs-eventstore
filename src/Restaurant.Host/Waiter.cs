@@ -1,6 +1,4 @@
-﻿using Restaurant.Tests;
-
-namespace Restaurant.Host
+﻿namespace Restaurant.Host
 {
     internal class Waiter
     {

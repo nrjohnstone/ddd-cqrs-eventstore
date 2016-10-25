@@ -82,13 +82,18 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RestaurantDocument.cs" />
     <Compile Include="RestaurantDocumentTests.cs" />
     <Compile Include="WaiterRestaurantDocumentWriter.cs" />
     <Compile Include="WaiterRestaurantDocumentWriterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Restaurant.Host\Restaurant.Host.csproj">
+      <Project>{AB4EE8A7-24A5-427F-9896-4599A608D2E1}</Project>
+      <Name>Restaurant.Host</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

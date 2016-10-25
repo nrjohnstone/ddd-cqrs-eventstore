@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using Restaurant.Tests;
 
 namespace Restaurant.Host
 {

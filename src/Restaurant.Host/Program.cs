@@ -7,7 +7,6 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Restaurant.Host.Dispatchers;
-using Restaurant.Tests;
 
 namespace Restaurant.Host
 {

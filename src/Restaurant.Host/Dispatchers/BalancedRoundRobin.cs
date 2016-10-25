@@ -1,7 +1,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using Restaurant.Tests;
 
 namespace Restaurant.Host.Dispatchers
 {
