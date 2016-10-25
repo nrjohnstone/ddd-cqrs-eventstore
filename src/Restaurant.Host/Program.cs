@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using Restaurant.Host.Actors;
 using Restaurant.Host.Dispatchers;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host
 {
@@ -17,39 +12,46 @@ namespace Restaurant.Host
     {
         private static Random _random;
         private static List<IStartable> _startables;
-        private static TimeToLiveHandler _dispatcherTtl;
         private static TimeToLiveHandler _cookBob;
         private static TimeToLiveHandler _cookPaco;
         private static TimeToLiveHandler _cookSteve;
+        private static TopicPublisher _publisher;
 
         static void Main(string[] args)
         {
             _random = new Random();
             _startables = new List<IStartable>();
+            _publisher = new TopicPublisher();
 
             IOrderHandler printerHandler = new PrinterHandler();
 
-            var cashier = new Cashier(printerHandler);
+            var cashier = new Cashier(_publisher);
 
-            var cashierThread = CreateQueueThreadHandler(cashier);
+            var cashierQueue = CreateQueueThreadHandler(cashier);
 
-            IOrderHandler asstManager = new AssistantManager(cashierThread);
+            IOrderHandler asstManager = new AssistantManager(_publisher);
 
             var cookHandlers = CreateCooks(asstManager);
 
             IOrderHandler dispatcher = new BalancedRoundRobin(cookHandlers);
-            var dispatcherQueueThread = new QueueThreadHandler(dispatcher);
-            _startables.Add(dispatcherQueueThread);
+            var cooksDispatcherQueue = new QueueThreadHandler(dispatcher);
+            
+            _startables.Add(cooksDispatcherQueue);
 
-           _dispatcherTtl = new TimeToLiveHandler(dispatcherQueueThread);
-            var waiter = new Waiter(_dispatcherTtl);
+            var waiter = new Waiter(_publisher);
 
             List<QueueThreadHandler> queuesToMonitor = new List<QueueThreadHandler>();
             queuesToMonitor.AddRange(cookHandlers);
-            queuesToMonitor.Add(dispatcherQueueThread);
+            queuesToMonitor.Add(cooksDispatcherQueue);
             var queueMonitor = new QueueMonitor(queuesToMonitor);
             _startables.Add(queueMonitor);
-            
+
+            // Subscriptions
+            _publisher.Subscribe(Events.OrderCreated, cooksDispatcherQueue);
+            _publisher.Subscribe("MealCooked", asstManager);
+            _publisher.Subscribe("PricesAdded", cashierQueue);
+            _publisher.Subscribe("OrderSpiked", printerHandler);
+
             _startables.ForEach(x => x.Start());
 
             bool shutdown = false;
@@ -82,7 +84,6 @@ namespace Restaurant.Host
         private static void PrintDroppedMessages()
         {
             var totalOrdersDropped = 
-                _dispatcherTtl.TotalOrdersDropped +
                 _cookBob.TotalOrdersDropped +
                 _cookPaco.TotalOrdersDropped +
                 _cookSteve.TotalOrdersDropped;
@@ -95,16 +96,16 @@ namespace Restaurant.Host
         private static QueueThreadHandler[] CreateCooks(IOrderHandler asstManager)
         {
             _cookBob = new TimeToLiveHandler(
-                new Cook("Bob", asstManager,
-                10));
+                new Cook("Bob",
+                10, _publisher));
 
             _cookPaco = new TimeToLiveHandler(
-                new Cook("Paco", asstManager,
-                499));
+                new Cook("Paco",
+                499, _publisher));
 
             _cookSteve = new TimeToLiveHandler(
-                new Cook("Steve", asstManager,
-                1500));
+                new Cook("Steve",
+                1500, _publisher));
 
             var queueThreadHandlers = new[]
             {
@@ -142,5 +143,10 @@ namespace Restaurant.Host
                 Console.WriteLine($"Outstanding order {order.Id}");
             }
         }
+    }
+
+    public static class Events
+    {
+        public const string OrderCreated = nameof(Events.OrderCreated);
     }
 }

@@ -2,17 +2,18 @@ using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
     internal class Cashier : IOrderHandler
     {
-        private readonly IOrderHandler _nextHandler;
+        private readonly IPublisher _publisher;
         private readonly ConcurrentDictionary<string, RestaurantDocument> _unpaidOrders;
 
-        public Cashier(IOrderHandler nextHandler)
+        public Cashier(IPublisher publisher)
         {
-            _nextHandler = nextHandler;
+            _publisher = publisher;
             _unpaidOrders = new ConcurrentDictionary<string, RestaurantDocument>();
         }
 
@@ -23,7 +24,7 @@ namespace Restaurant.Host.Actors
             {
                 orderHandler = _unpaidOrders.TryAdd(order.Id, order);
             }
-            _nextHandler.Handle(order);
+            _publisher.Publish("OrderSpiked", order);
         }
 
         public void Pay(string id)

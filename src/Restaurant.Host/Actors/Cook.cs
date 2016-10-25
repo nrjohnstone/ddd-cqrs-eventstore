@@ -1,22 +1,23 @@
 using System;
 using System.Threading;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
     internal class Cook : IOrderHandler
     {
         public string Name { get; }
-        private readonly IOrderHandler _nextHandler;
- 
-        private readonly int _cookingTime;
 
-        public Cook(string name, IOrderHandler nextHandler, int cookingTime)
+        private readonly int _cookingTime;
+        private readonly IPublisher _publisher;
+
+        public Cook(string name, int cookingTime, IPublisher publisher)
         {
             Name = name;
             Console.WriteLine($"{Name} {_cookingTime}");
-            _nextHandler = nextHandler;
             _cookingTime = cookingTime;
+            _publisher = publisher;
         }
 
         public void Handle(RestaurantDocument order)
@@ -27,7 +28,7 @@ namespace Restaurant.Host.Actors
 
             WaitForMealToBeCooked();
             MealsCooked++;
-            _nextHandler.Handle(order);
+            _publisher.Publish("MealCooked", order);
         }
 
         public int MealsCooked { get; private set; }

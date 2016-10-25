@@ -1,16 +1,17 @@
 ﻿using System.Linq;
 using System.Threading;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
     internal class AssistantManager : IOrderHandler
     {
-        private readonly IOrderHandler _nextHandler;
+        private readonly IPublisher _publisher;
 
-        public AssistantManager(IOrderHandler nextHandler)
+        public AssistantManager(IPublisher publisher)
         {
-            _nextHandler = nextHandler;
+            _publisher = publisher;
         }
 
         public void Handle(RestaurantDocument order)
@@ -20,7 +21,7 @@ namespace Restaurant.Host.Actors
             order.Total = order.Items.Sum(x => x.Price);
 
             Thread.Sleep(500);
-            _nextHandler.Handle(order);
+            _publisher.Publish("PricesAdded", order);
         }
     }
 }
