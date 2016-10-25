@@ -49,8 +49,10 @@
     <Compile Include="Dispatchers\Fanout.cs" />
     <Compile Include="Dispatchers\BalancedRoundRobin.cs" />
     <Compile Include="Dispatchers\RoundRobin.cs" />
+    <Compile Include="Ingredient.cs" />
     <Compile Include="IOrderHandler.cs" />
     <Compile Include="IStartable.cs" />
+    <Compile Include="Item.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="OrderFactory.cs" />
     <Compile Include="PrinterHandler.cs" />
@@ -58,16 +60,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueMonitor.cs" />
     <Compile Include="QueueThreadHandler.cs" />
+    <Compile Include="RestaurantDocument.cs" />
     <Compile Include="Waiter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Restaurant.Tests\Restaurant.Tests.csproj">
-      <Project>{4AB1DAEE-4D4A-4E96-A0CB-01513F990C58}</Project>
-      <Name>Restaurant.Tests</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

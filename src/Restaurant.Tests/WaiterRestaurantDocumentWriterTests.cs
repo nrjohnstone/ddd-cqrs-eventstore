@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Restaurant.Host;
 using Xunit;
 
 namespace Restaurant.Tests
@@ -183,20 +184,5 @@ namespace Restaurant.Tests
         }
 
 
-    }
-
-    public class Item
-    {
-        public string Description { get; set; }
-        public int Price { get; set; }
-
-        public Item(string description)
-        {
-            Description = description;
-        }
-    }
-
-    public class Ingredient
-    {
     }
 }

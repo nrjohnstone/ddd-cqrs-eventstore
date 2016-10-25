@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Restaurant.Tests
+namespace Restaurant.Host
 {
     public class RestaurantDocument
     {

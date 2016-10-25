@@ -1,5 +1,3 @@
-using Restaurant.Tests;
-
 namespace Restaurant.Host.Dispatchers
 {
     internal class Fanout : IOrderHandler
