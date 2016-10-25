@@ -12,9 +12,9 @@ namespace Restaurant.Host
     {
         private static Random _random;
         private static List<IStartable> _startables;
-        private static TimeToLiveHandler _cookBob;
-        private static TimeToLiveHandler _cookPaco;
-        private static TimeToLiveHandler _cookSteve;
+        private static TimeToLiveHandler<OrderPlaced> _cookBob;
+        private static TimeToLiveHandler<OrderPlaced> _cookPaco;
+        private static TimeToLiveHandler<OrderPlaced> _cookSteve;
         private static TopicPublisher _publisher;
 
         static void Main(string[] args)
@@ -23,34 +23,34 @@ namespace Restaurant.Host
             _startables = new List<IStartable>();
             _publisher = new TopicPublisher();
 
-            IOrderHandler printerHandler = new PrinterHandler();
+            var printerHandler = new PrinterHandler();
 
             var cashier = new Cashier(_publisher);
 
             var cashierQueue = CreateQueueThreadHandler(cashier);
 
-            IOrderHandler asstManager = new AssistantManager(_publisher);
+            var asstManager = new AssistantManager(_publisher);
 
-            var cookHandlers = CreateCooks(asstManager);
+            var cookHandlers = CreateCooks();
 
-            IOrderHandler dispatcher = new BalancedRoundRobin(cookHandlers);
-            var cooksDispatcherQueue = new QueueThreadHandler(dispatcher);
+            var dispatcher = new BalancedRoundRobin<OrderPlaced>(cookHandlers);
+            var cooksDispatcherQueue = new MonitorableQueueThreadHandler<OrderPlaced>(dispatcher);
             
             _startables.Add(cooksDispatcherQueue);
 
             var waiter = new Waiter(_publisher);
 
-            List<QueueThreadHandler> queuesToMonitor = new List<QueueThreadHandler>();
+            var queuesToMonitor = new List<IMonitorableQueue>();
             queuesToMonitor.AddRange(cookHandlers);
             queuesToMonitor.Add(cooksDispatcherQueue);
             var queueMonitor = new QueueMonitor(queuesToMonitor);
             _startables.Add(queueMonitor);
 
             // Subscriptions
-            _publisher.Subscribe(Events.OrderCreated, cooksDispatcherQueue);
-            _publisher.Subscribe("MealCooked", asstManager);
-            _publisher.Subscribe("PricesAdded", cashierQueue);
-            _publisher.Subscribe("OrderSpiked", printerHandler);
+            _publisher.Subscribe(cooksDispatcherQueue);
+            _publisher.Subscribe(asstManager);
+            _publisher.Subscribe(cashierQueue);
+            _publisher.Subscribe(printerHandler);
 
             _startables.ForEach(x => x.Start());
 
@@ -93,17 +93,17 @@ namespace Restaurant.Host
             Console.WriteLine($"Steve dropped messages {_cookSteve.TotalOrdersDropped}");
         }
 
-        private static QueueThreadHandler[] CreateCooks(IOrderHandler asstManager)
+        private static MonitorableQueueThreadHandler<OrderPlaced>[] CreateCooks()
         {
-            _cookBob = new TimeToLiveHandler(
+            _cookBob = new TimeToLiveHandler<OrderPlaced>(
                 new Cook("Bob",
                 10, _publisher));
 
-            _cookPaco = new TimeToLiveHandler(
+            _cookPaco = new TimeToLiveHandler<OrderPlaced>(
                 new Cook("Paco",
                 499, _publisher));
 
-            _cookSteve = new TimeToLiveHandler(
+            _cookSteve = new TimeToLiveHandler<OrderPlaced>(
                 new Cook("Steve",
                 1500, _publisher));
 
@@ -116,9 +116,9 @@ namespace Restaurant.Host
             return queueThreadHandlers;
         }
 
-        private static QueueThreadHandler CreateQueueThreadHandler(IOrderHandler cashier)
+        private static MonitorableQueueThreadHandler<T> CreateQueueThreadHandler<T>(IOrderHandler<T> cashier) where T : MessageBase
         {
-            var cashierThread = new QueueThreadHandler(cashier);
+            var cashierThread = new MonitorableQueueThreadHandler<T>(cashier);
             _startables.Add(cashierThread);
             return cashierThread;
         }

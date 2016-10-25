@@ -6,14 +6,13 @@ namespace Restaurant.Host
 {
     internal class QueueMonitor : IStartable
     {
-        private readonly IEnumerable<QueueThreadHandler> _queueThreadHandlers;
+        private readonly IEnumerable<IMonitorableQueue> _queueThreadHandlers;
         private Thread _thread;
 
-        public QueueMonitor(IEnumerable<QueueThreadHandler> queueThreadHandlers)
+        public QueueMonitor(IEnumerable<IMonitorableQueue> queueThreadHandlers)
         {
             _queueThreadHandlers = queueThreadHandlers;
         }
-
 
         public void Start()
         {

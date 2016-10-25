@@ -5,19 +5,20 @@ using Restaurant.Host.Documents;
 
 namespace Restaurant.Host
 {
-    internal class QueueThreadHandler : IOrderHandler, IStartable
+    internal class MonitorableQueueThreadHandler<T> : 
+        IOrderHandler<T>, IStartable, IMonitorableQueue where T:MessageBase
     {
-        private readonly IOrderHandler _orderHandler;
-        private readonly ConcurrentQueue<RestaurantDocument> _orderQueue;
+        private readonly IOrderHandler<T> _orderHandler;
+        private readonly ConcurrentQueue<T> _orderQueue;
         private Thread _thread;
 
-        public QueueThreadHandler(IOrderHandler orderHandler)
+        public MonitorableQueueThreadHandler(IOrderHandler<T> orderHandler)
         {
             _orderHandler = orderHandler;
-            _orderQueue = new ConcurrentQueue<RestaurantDocument>();
+            _orderQueue = new ConcurrentQueue<T>();
         }
 
-        public void Handle(RestaurantDocument order)
+        public void Handle(T order)
         {
             _orderQueue.Enqueue(order);
         }
@@ -31,7 +32,7 @@ namespace Restaurant.Host
             {
                 while (true)
                 {
-                    RestaurantDocument order;
+                    T order;
                     _orderQueue.TryDequeue(out order);
                     if (order != null)
                     {
@@ -43,5 +44,12 @@ namespace Restaurant.Host
             _thread.Name = $"Thread_{_thread.ManagedThreadId}";
             _thread.Start();
         }
+
+    }
+
+    internal interface IMonitorableQueue
+    {
+        int Count { get; }
+        string Name { get; }
     }
 }

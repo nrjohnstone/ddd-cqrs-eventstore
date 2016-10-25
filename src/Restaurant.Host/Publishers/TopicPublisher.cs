@@ -9,22 +9,20 @@ namespace Restaurant.Host.Publishers
 {
     internal class TopicPublisher : IPublisher
     {
-        private Dictionary<string, List<IOrderHandler>> _subscribers;
-        private Dictionary<Type, List<IOrderMessageHandler>> _subscribersByType;
+        private Dictionary<string, List<object>> _subscribers;
 
         private readonly object _lock = new object();
 
         public TopicPublisher()
         {
-            _subscribers = new Dictionary<string, List<IOrderHandler>>();
-            _subscribersByType = new Dictionary<Type, List<IOrderMessageHandler>>();
+            _subscribers = new Dictionary<string, List<object>>();
         }
 
-        public void Publish(string topic, RestaurantDocument order)
+        public void Publish<T>(string topic, T order)
         {
             if (_subscribers.ContainsKey(topic))
             {
-                foreach (var orderHandler in _subscribers[topic])
+                foreach (dynamic orderHandler in _subscribers[topic])
                 {
                     orderHandler.Handle(order);
                 }
@@ -33,21 +31,20 @@ namespace Restaurant.Host.Publishers
 
         public void Publish<T>(T message)
         {
-            if (_subscribersByType.ContainsKey(typeof(T)))
-            {
-                foreach (var orderHandler in _subscribersByType[typeof(T)])
-                {
-                    orderHandler.Handle(message);
-                }
-            }
+            string topic = typeof(T).Name;
+            this.Publish(topic, message);
         }
 
-        public void Subscribe<T>(IOrderMessageHandler handler)
+        public void Subscribe<T>(IOrderHandler<T> handler)
         {
-            var subscribers = new Dictionary<Type, List<IOrderMessageHandler>>(
-                _subscribersByType);
+            string topic = typeof(T).Name;
 
-            var topic = typeof(T);
+            Subscribe(topic, handler);
+        }
+
+        protected void Subscribe<T>(string topic, IOrderHandler<T> handler)
+        {
+            var subscribers = new Dictionary<string, List<object>>(_subscribers);
 
             if (subscribers.ContainsKey(topic))
             {
@@ -55,27 +52,7 @@ namespace Restaurant.Host.Publishers
             }
             else
             {
-                subscribers.Add(topic, new List<IOrderMessageHandler>() { handler });
-            }
-
-            lock (_lock)
-            {
-                _subscribersByType = subscribers;
-            }
-        }
-
-        public void Subscribe(string topic, IOrderHandler handler)
-        {
-            var subscribers = new Dictionary<string, List<IOrderHandler>>(
-                _subscribers);
-
-            if (subscribers.ContainsKey(topic))
-            {
-                subscribers[topic].Add(handler);
-            }
-            else
-            {
-                subscribers.Add(topic, new List<IOrderHandler>() { handler });
+                subscribers.Add(topic, new List<object>() { handler });
             }
 
             lock(_lock)

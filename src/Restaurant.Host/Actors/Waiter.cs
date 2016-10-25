@@ -1,4 +1,5 @@
-﻿using Restaurant.Host.Documents;
+﻿using System;
+using Restaurant.Host.Documents;
 using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
@@ -14,7 +15,8 @@ namespace Restaurant.Host.Actors
 
         public void PlaceOrder(RestaurantDocument order)
         {
-            _publisher.Publish(Events.OrderCreated, order);
+            _publisher.Publish(new OrderPlaced(order, 
+                DateTime.Now + TimeSpan.FromMilliseconds(5000)));
         }
     }
 }

@@ -5,7 +5,7 @@ using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
-    internal class Cook : IOrderHandler
+    internal class Cook : IOrderHandler<OrderPlaced>
     {
         public string Name { get; }
 
@@ -20,22 +20,23 @@ namespace Restaurant.Host.Actors
             _publisher = publisher;
         }
 
-        public void Handle(RestaurantDocument order)
-        {
-            Console.WriteLine($"{Name} received order");
-            order.Ingredients.Add("Tomato");
-            order.TimeToCookMs = 500;
-
-            WaitForMealToBeCooked();
-            MealsCooked++;
-            _publisher.Publish("MealCooked", order);
-        }
-
         public int MealsCooked { get; private set; }
 
         private void WaitForMealToBeCooked()
         {
             Thread.Sleep(_cookingTime);
+        }
+
+        public void Handle(OrderPlaced message)
+        {
+            RestaurantDocument order1 = message.Order;
+            Console.WriteLine($"{Name} received order");
+            order1.Ingredients.Add("Tomato");
+            order1.TimeToCookMs = 500;
+
+            WaitForMealToBeCooked();
+            MealsCooked++;
+            _publisher.Publish(new OrderCooked(order1));
         }
     }
 }

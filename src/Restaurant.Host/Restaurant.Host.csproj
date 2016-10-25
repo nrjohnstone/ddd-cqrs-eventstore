@@ -46,6 +46,10 @@
     <Compile Include="Actors\AssistantManager.cs" />
     <Compile Include="Actors\Cashier.cs" />
     <Compile Include="Actors\Cook.cs" />
+    <Compile Include="Actors\OrderCooked.cs" />
+    <Compile Include="Actors\OrderPlaced.cs" />
+    <Compile Include="Actors\OrderPriced.cs" />
+    <Compile Include="Actors\OrderSpiked.cs" />
     <Compile Include="Dispatchers\Fanout.cs" />
     <Compile Include="Dispatchers\BalancedRoundRobin.cs" />
     <Compile Include="Dispatchers\RoundRobin.cs" />

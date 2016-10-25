@@ -5,7 +5,7 @@ using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
-    internal class AssistantManager : IOrderHandler
+    internal class AssistantManager : IOrderHandler<OrderCooked>
     {
         private readonly IPublisher _publisher;
 
@@ -21,7 +21,13 @@ namespace Restaurant.Host.Actors
             order.Total = order.Items.Sum(x => x.Price);
 
             Thread.Sleep(500);
-            _publisher.Publish("PricesAdded", order);
+            _publisher.Publish(new OrderPriced(order));
+        }
+
+        
+        public void Handle(OrderCooked message)
+        {
+            Handle(message.Order);
         }
     }
 }
