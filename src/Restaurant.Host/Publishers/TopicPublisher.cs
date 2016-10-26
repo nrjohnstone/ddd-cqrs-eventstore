@@ -29,17 +29,32 @@ namespace Restaurant.Host.Publishers
             }
         }
 
-        public void Publish<T>(T message)
+        public void Publish<T>(T message) where T : MessageBase
         {
             string topic = typeof(T).Name;
-            this.Publish(topic, message);
+           
+            Publish(topic, message);
+            Publish(message.CorrelationId, message);
         }
 
-        public void Subscribe<T>(IOrderHandler<T> handler)
+        public void Subscribe<T>(IOrderHandler<T> handler) where T : MessageBase
         {
             string topic = typeof(T).Name;
 
             Subscribe(topic, handler);
+        }
+
+        void IPublisher.Subscribe<T>(string correlationId, IOrderHandler<T> handler)
+        {
+            Subscribe(correlationId, handler);
+        }
+
+        void IPublisher.Unsubscribe<T>(string topic, IOrderHandler<T> handler)
+        {
+            if (_subscribers.ContainsKey(topic))
+            {
+                _subscribers.Remove(topic);
+            }
         }
 
         protected void Subscribe<T>(string topic, IOrderHandler<T> handler)

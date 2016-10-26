@@ -17,7 +17,7 @@ namespace Restaurant.Host
         {
             if (DateTime.Now > message.TimeToLive)
             {
-                Console.WriteLine($"Dropping order {message.Id} due to staleness");
+                Console.WriteLine($"Dropping order {message.MessageId} due to staleness");
                 TotalOrdersDropped++;
                 return;
             }

@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using Restaurant.Host.Commands;
 using Restaurant.Host.Documents;
 using Restaurant.Host.Events;
 using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
-    internal class Cashier : IOrderHandler<OrderPriced>
+    internal class Cashier : IOrderHandler<TakePayment>
     {
         private readonly IPublisher _publisher;
         private readonly ConcurrentDictionary<string, RestaurantDocument> _unpaidOrders;
@@ -35,7 +36,7 @@ namespace Restaurant.Host.Actors
             return _unpaidOrders.Values.ToArray();
         }
 
-        public void Handle(OrderPriced message)
+        public void Handle(TakePayment message)
         {
             RestaurantDocument order = message.Order;
 
@@ -44,7 +45,10 @@ namespace Restaurant.Host.Actors
             {
                 orderHandler = _unpaidOrders.TryAdd(order.Id, order);
             }
-            _publisher.Publish(new OrderSpiked(order));
+            string correlationId = message.CorrelationId;
+            string causativeId = message.MessageId;
+            _publisher.Publish(new OrderSpiked(order, Guid.NewGuid().ToString(), correlationId,
+                causativeId));
         }
     }
 }

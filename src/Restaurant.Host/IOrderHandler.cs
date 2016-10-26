@@ -9,10 +9,15 @@ namespace Restaurant.Host
 
     internal class MessageBase
     {
-        public MessageBase()
+        public MessageBase(string messageId, string correlationId, string causativeId)
         {
+            MessageId = messageId;
+            CorrelationId = correlationId;
+            CausativeId = causativeId;
         }
 
-        public string Id { get; protected set; }
+        public string MessageId { get; protected set; }
+        public string CorrelationId { get; }
+        public string CausativeId { get; }
     }
 }

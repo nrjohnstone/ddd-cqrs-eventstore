@@ -6,10 +6,10 @@ namespace Restaurant.Host.Events
     {
         public RestaurantDocument Order { get;  }
 
-        public OrderPriced(RestaurantDocument order)
+        public OrderPriced(RestaurantDocument order, string messageId, string correlationId, string causativeId) 
+            : base(messageId, correlationId, causativeId)
         {
             Order = order;
-            Id = order.Id;
         }
     }
 }

@@ -1,12 +1,13 @@
 using System;
 using System.Threading;
+using Restaurant.Host.Commands;
 using Restaurant.Host.Documents;
 using Restaurant.Host.Events;
 using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
 {
-    internal class Cook : IOrderHandler<OrderPlaced>
+    internal class Cook : IOrderHandler<CookFood>
     {
         public string Name { get; }
 
@@ -28,16 +29,19 @@ namespace Restaurant.Host.Actors
             Thread.Sleep(_cookingTime);
         }
 
-        public void Handle(OrderPlaced message)
+        public void Handle(CookFood message)
         {
-            RestaurantDocument order1 = message.Order;
+            RestaurantDocument order = message.Order;
             Console.WriteLine($"{Name} received order");
-            order1.Ingredients.Add("Tomato");
-            order1.TimeToCookMs = 500;
+            order.Ingredients.Add("Tomato");
+            order.TimeToCookMs = 500;
 
             WaitForMealToBeCooked();
             MealsCooked++;
-            _publisher.Publish(new OrderCooked(order1));
+            string correlationId = message.CorrelationId;
+            string causativeId = message.MessageId;
+            _publisher.Publish(new FoodCooked(order, Guid.NewGuid().ToString(), correlationId,
+                causativeId));
         }
     }
 }

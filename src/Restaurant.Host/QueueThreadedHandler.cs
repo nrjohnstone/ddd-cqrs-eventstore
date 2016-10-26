@@ -35,7 +35,7 @@ namespace Restaurant.Host
                     _orderQueue.TryDequeue(out order);
                     if (order != null)
                     {
-                        Console.WriteLine($"Handling order {order.Id}");
+                        Console.WriteLine($"Handling order {order.MessageId}");
                         _orderHandler.Handle(order);
                     }
                 }

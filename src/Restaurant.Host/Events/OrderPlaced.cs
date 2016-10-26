@@ -7,11 +7,11 @@ namespace Restaurant.Host.Events
     {
         public RestaurantDocument Order { get; }
 
-        public OrderPlaced(RestaurantDocument order, DateTime timeToLive)
+        public OrderPlaced(RestaurantDocument order, DateTime timeToLive, string messageId, string correlationId, string causativeId) 
+            : base(messageId, correlationId, causativeId)
         {
             Order = order;
             TimeToLive = timeToLive;
-            Id = order.Id;
         }
 
         public DateTime TimeToLive { get; }

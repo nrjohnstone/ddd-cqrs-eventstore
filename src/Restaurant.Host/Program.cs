@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using Restaurant.Host.Actors;
+using Restaurant.Host.Commands;
 using Restaurant.Host.Dispatchers;
 using Restaurant.Host.Documents;
 using Restaurant.Host.Events;
@@ -13,9 +14,9 @@ namespace Restaurant.Host
     {
         private static Random _random;
         private static List<IStartable> _startables;
-        private static TimeToLiveHandler<OrderPlaced> _ttlBob;
-        private static TimeToLiveHandler<OrderPlaced> _ttlPaco;
-        private static TimeToLiveHandler<OrderPlaced> _ttlSteve;
+        private static TimeToLiveHandler<CookFood> _ttlBob;
+        private static TimeToLiveHandler<CookFood> _ttlPaco;
+        private static TimeToLiveHandler<CookFood> _ttlSteve;
         private static TopicPublisher _publisher;
         private static PrinterHandler _printerHandler;
         private static Waiter _waiter;
@@ -46,27 +47,27 @@ namespace Restaurant.Host
 
             #region "Create TTL Handlers"
 
-            _ttlBob = new TimeToLiveHandler<OrderPlaced>(_cookBob);
-            _ttlPaco = new TimeToLiveHandler<OrderPlaced>(_cookPaco);
-            _ttlSteve = new TimeToLiveHandler<OrderPlaced>(_cookSteve);
+            _ttlBob = new TimeToLiveHandler<CookFood>(_cookBob);
+            _ttlPaco = new TimeToLiveHandler<CookFood>(_cookPaco);
+            _ttlSteve = new TimeToLiveHandler<CookFood>(_cookSteve);
 
             #endregion
 
             #region "Create Queues"
 
-            var cashierQueue = new QueueThreadedHandler<OrderPriced>(_cashier);
-            var cookBobQueue = new QueueThreadedHandler<OrderPlaced>(_ttlBob);
-            var cookPacoQueue = new QueueThreadedHandler<OrderPlaced>(_ttlPaco);
-            var cookSteveQueue = new QueueThreadedHandler<OrderPlaced>(_ttlSteve);
+            var cashierQueue = new QueueThreadedHandler<TakePayment>(_cashier);
+            var cookBobQueue = new QueueThreadedHandler<CookFood>(_ttlBob);
+            var cookPacoQueue = new QueueThreadedHandler<CookFood>(_ttlPaco);
+            var cookSteveQueue = new QueueThreadedHandler<CookFood>(_ttlSteve);
 
-            var cooksReceieveQueue = new BalancedRoundRobin<OrderPlaced>(new[]
+            var cooksReceieveQueue = new BalancedRoundRobin<CookFood>(new[]
             {
                 cookBobQueue,
                 cookPacoQueue,
                 cookSteveQueue
             });
 
-            var kitchenReceieveQueue = new QueueThreadedHandler<OrderPlaced>(cooksReceieveQueue);
+            var kitchenReceieveQueue = new QueueThreadedHandler<CookFood>(cooksReceieveQueue);
 
             #endregion
 
