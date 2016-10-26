@@ -25,7 +25,7 @@ namespace Restaurant.Host
             }
             catch (Exception ex)
             {
-                
+                Console.WriteLine(ex);
             }
 
             Console.WriteLine($"Tax: {order.Tax}");
