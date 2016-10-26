@@ -2,7 +2,7 @@ using Restaurant.Host.Documents;
 
 namespace Restaurant.Host.Events
 {
-    internal class FoodCooked : MessageBase
+    public class FoodCooked : MessageBase
     {
         public RestaurantDocument Order { get; }
 

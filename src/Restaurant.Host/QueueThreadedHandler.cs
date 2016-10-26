@@ -23,7 +23,7 @@ namespace Restaurant.Host
         }
 
         public int Count => _orderQueue.Count;
-        public string Name => _thread.Name;
+        public string Name { get; set; }
 
         public void Start()
         {
@@ -40,7 +40,7 @@ namespace Restaurant.Host
                     }
                 }
             });
-            _thread.Name = $"Thread_{_thread.ManagedThreadId}";
+            _thread.Name = $"{Name}_Thread_{_thread.ManagedThreadId}";
             _thread.Start();
         }
 

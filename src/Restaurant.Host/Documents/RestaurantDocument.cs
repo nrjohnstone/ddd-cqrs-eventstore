@@ -23,5 +23,6 @@ namespace Restaurant.Host.Documents
         }
 
         public DateTime TimeToLive { get; }
+        public bool IsDodgy { get; set; }
     }
 }

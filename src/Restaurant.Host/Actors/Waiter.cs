@@ -20,12 +20,6 @@ namespace Restaurant.Host.Actors
             string correlationId = Guid.NewGuid().ToString();
             string causativeId = "-1";
 
-            if (_firstOrder)
-            {
-                _firstOrder = false;
-                var watcher = new CorrelationIdHandler<MessageBase>();
-                _publisher.Subscribe(correlationId, watcher);
-            }
             _publisher.Publish(new OrderPlaced(order, 
                 DateTime.Now + TimeSpan.FromMilliseconds(5000), Guid.NewGuid().ToString(), 
                 correlationId, causativeId));

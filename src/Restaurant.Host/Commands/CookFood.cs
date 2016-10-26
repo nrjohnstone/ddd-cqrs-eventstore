@@ -7,13 +7,14 @@ using Restaurant.Host.Documents;
 
 namespace Restaurant.Host.Commands
 {
-    internal class CookFood : MessageBase, ITimeToLive
+    public class CookFood : MessageBase, ITimeToLive
     {
         public RestaurantDocument Order { get; }
 
-        public CookFood(RestaurantDocument order, string messageId, string correlationId, string causativeId) : base(messageId, correlationId, causativeId)
+        public CookFood(RestaurantDocument order, string messageId, string correlationId, string causativeId, DateTime timeToLive) : base(messageId, correlationId, causativeId)
         {
             Order = order;
+            TimeToLive = timeToLive;
         }
 
         public DateTime TimeToLive { get; }

@@ -30,5 +30,10 @@ namespace Restaurant.Host
             });
             _thread.Start();
         }
+
+        public void Stop()
+        {
+            _thread.Abort();
+        }
     }
 }

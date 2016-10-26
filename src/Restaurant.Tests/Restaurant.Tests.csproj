@@ -81,6 +81,9 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="AlarmClockTests.cs" />
+    <Compile Include="AssistantManagerTests.cs" />
+    <Compile Include="MidgetTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RestaurantDocumentTests.cs" />
     <Compile Include="WaiterRestaurantDocumentWriter.cs" />

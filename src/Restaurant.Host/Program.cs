@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Restaurant.Host.Actors;
 using Restaurant.Host.Commands;
@@ -25,6 +26,13 @@ namespace Restaurant.Host
         private static Cook _cookBob;
         private static Cook _cookPaco;
         private static Cook _cookSteve;
+        private static MidgetHouse<OrderPlaced> _midgetHouse;
+        private static QueueThreadedHandler<MessageBase> _midgetDispatchQueue;
+        private static ScrewedUpHandler<CookFood> _screwedBob;
+        private static ScrewedUpHandler<CookFood> _screwedPaco;
+        private static ScrewedUpHandler<CookFood> _screwedSteve;
+        private static ScrewedUpHandler<PriceOrder> _screwedAsstManager;
+        private static AlarmClock _alarmClock;
 
         static void Main(string[] args)
         {
@@ -41,7 +49,14 @@ namespace Restaurant.Host
 
             _cookBob = new Cook("Bob", 10, _publisher);
             _cookPaco = new Cook("Paco", 25, _publisher);
-            _cookSteve = new Cook("Steve", 5000, _publisher);
+            _cookSteve = new Cook("Steve", 500, _publisher);
+
+            _midgetHouse = new MidgetHouse<OrderPlaced>(_publisher);
+            _midgetDispatchQueue = new QueueThreadedHandler<MessageBase>(_midgetHouse);
+            _midgetDispatchQueue.Name = "MidgetDispatchQueue";
+            _midgetHouse.MidgetDispatchQueue = _midgetDispatchQueue;
+
+            _alarmClock = new AlarmClock(_publisher);
 
             #endregion
 
@@ -53,12 +68,24 @@ namespace Restaurant.Host
 
             #endregion
 
+            #region "Created ScrewedUp Handlers"
+
+            _screwedBob = new ScrewedUpHandler<CookFood>(_ttlBob, 50, 0);
+            _screwedPaco = new ScrewedUpHandler<CookFood>(_ttlPaco, 0, 0);
+            _screwedSteve = new ScrewedUpHandler<CookFood>(_ttlSteve, 0, 0);
+            _screwedAsstManager = new ScrewedUpHandler<PriceOrder>(_asstManager, 0, 0);
+
+            #endregion
+
             #region "Create Queues"
 
             var cashierQueue = new QueueThreadedHandler<TakePayment>(_cashier);
-            var cookBobQueue = new QueueThreadedHandler<CookFood>(_ttlBob);
-            var cookPacoQueue = new QueueThreadedHandler<CookFood>(_ttlPaco);
-            var cookSteveQueue = new QueueThreadedHandler<CookFood>(_ttlSteve);
+            var cookBobQueue = new QueueThreadedHandler<CookFood>(_screwedBob);
+            cookBobQueue.Name = "BobsQueue";
+            var cookPacoQueue = new QueueThreadedHandler<CookFood>(_screwedPaco);
+            cookPacoQueue.Name = "PacosQueue";
+            var cookSteveQueue = new QueueThreadedHandler<CookFood>(_screwedSteve);
+            cookSteveQueue.Name = "StevesQueue";
 
             var cooksReceieveQueue = new BalancedRoundRobin<CookFood>(new[]
             {
@@ -90,12 +117,14 @@ namespace Restaurant.Host
             #region "Subscribe to Events"
 
             _publisher.Subscribe(kitchenReceieveQueue);
-            _publisher.Subscribe(_asstManager);
+            _publisher.Subscribe(_screwedAsstManager);
             _publisher.Subscribe(cashierQueue);
             _publisher.Subscribe(_printerHandler);
+            _publisher.Subscribe<OrderPlaced>(_midgetHouse);
+            _publisher.Subscribe(_alarmClock);
 
             #endregion
-              
+
             #region "Start threads"
 
             _startables.Add(cashierQueue);
@@ -104,6 +133,8 @@ namespace Restaurant.Host
             _startables.Add(cookSteveQueue);
             _startables.Add(kitchenReceieveQueue);
             _startables.Add(queueMonitor);
+            _startables.Add(_midgetDispatchQueue);
+            _startables.Add(_alarmClock);
 
             _startables.ForEach(x => x.Start());
 
@@ -114,10 +145,10 @@ namespace Restaurant.Host
 
             while (!shutdown)
             {
-                if (ordersCreated < 100)
+                if (ordersCreated < 10)
                 {
-                    PlaceOrders(_waiter, 5);
-                    ordersCreated += 5;
+                    PlaceOrders(_waiter, 1);
+                    ordersCreated += 1;
                 }
                 
                 var outstandingOrders = _cashier.GetOutstandingOrders();
@@ -132,27 +163,63 @@ namespace Restaurant.Host
                 var outstandingOrdersAfterPay = _cashier.GetOutstandingOrders();
                 PrintOutstandingOrders(outstandingOrdersAfterPay);
                 PrintDroppedMessages();
+
+                if (TotalOrdersPaid + TotalOrdersDropped >= 100 &&
+                    TotalOrdersCooked + TotalOrdersDropped >= 100)
+                    shutdown = true;
+
                 Thread.Sleep(500);
             }
+
+            queueMonitor.Stop();
+            Console.WriteLine("<<FINISHED>>");
+            Console.ReadLine();
         }
 
         private static void PrintDroppedMessages()
         {
-            var totalOrdersDropped = 
-                _ttlBob.TotalOrdersDropped +
-                _ttlPaco.TotalOrdersDropped +
-                _ttlSteve.TotalOrdersDropped;
+            var totalOrdersDropped = TotalOrdersDropped;
+
             Console.WriteLine($"Total dropped messages {totalOrdersDropped}");
             Console.WriteLine($"Bob dropped messages {_ttlBob.TotalOrdersDropped}");
             Console.WriteLine($"Paco dropped messages {_ttlPaco.TotalOrdersDropped}");
             Console.WriteLine($"Steve dropped messages {_ttlSteve.TotalOrdersDropped}");
         }
 
+        private static int TotalOrdersDropped
+        {
+            get
+            {
+                var totalOrdersDropped =
+                    _ttlBob.TotalOrdersDropped +
+                    _ttlPaco.TotalOrdersDropped +
+                    _ttlSteve.TotalOrdersDropped;
+                return totalOrdersDropped;
+            }
+        }
+
+        private static int TotalOrdersCooked
+        {
+            get
+            {
+                var totalOrdersDropped =
+                    _cookBob.MealsCooked +
+                    _cookPaco.MealsCooked +
+                    _cookSteve.MealsCooked;
+                return totalOrdersDropped;
+            }
+        }
+
+        private static int TotalOrdersPaid => _cashier.OrdersPaid;
+
         private static void PlaceOrders(Waiter waiter, int numberOfOrders)
         {
             for (int j = 0; j < numberOfOrders; j++)
             {
-                waiter.PlaceOrder(OrderFactory.FishAndChips());
+                var order = OrderFactory.FishAndChips();
+                //order.IsDodgy = j % 2 == 0;
+                order.IsDodgy = false;
+                waiter.PlaceOrder(order);
             }
         }
 

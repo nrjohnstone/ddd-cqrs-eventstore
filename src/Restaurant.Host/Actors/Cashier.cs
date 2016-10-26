@@ -47,8 +47,11 @@ namespace Restaurant.Host.Actors
             }
             string correlationId = message.CorrelationId;
             string causativeId = message.MessageId;
+            OrdersPaid++;
             _publisher.Publish(new OrderSpiked(order, Guid.NewGuid().ToString(), correlationId,
                 causativeId));
         }
+
+        public int OrdersPaid { get; set; }
     }
 }

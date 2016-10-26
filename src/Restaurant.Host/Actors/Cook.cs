@@ -32,7 +32,7 @@ namespace Restaurant.Host.Actors
         public void Handle(CookFood message)
         {
             RestaurantDocument order = message.Order;
-            Console.WriteLine($"{Name} received order");
+            Console.WriteLine($"{Name} is cooking order {message.Order.Id}");
             order.Ingredients.Add("Tomato");
             order.TimeToCookMs = 500;
 

@@ -2,12 +2,12 @@ using Restaurant.Host.Documents;
 
 namespace Restaurant.Host
 {
-    internal interface IOrderHandler<T>
+    public interface IOrderHandler<T>
     {
         void Handle(T message);
     }
 
-    internal class MessageBase
+    public class MessageBase
     {
         public MessageBase(string messageId, string correlationId, string causativeId)
         {

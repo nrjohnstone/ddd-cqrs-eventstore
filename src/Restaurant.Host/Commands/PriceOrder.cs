@@ -2,7 +2,7 @@
 
 namespace Restaurant.Host.Commands
 {
-    internal class PriceOrder : MessageBase
+    public class PriceOrder : MessageBase
     {
         public RestaurantDocument Order { get;  }
 

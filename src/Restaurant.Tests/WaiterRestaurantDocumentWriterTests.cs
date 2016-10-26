@@ -149,23 +149,23 @@ namespace Restaurant.Tests
             sut.ToJsonString().Should().Be(expectedJson);
         }
 
-        [Fact]
-        public void WhenPropertyModified_ToJsonString_ShouldReturnCorrectJson()
-        {
-            var originalJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
-            {
-                TableNumber = 4
-            });
-            var sut = CreateSut(originalJson);
+        //[Fact]
+        //public void WhenPropertyModified_ToJsonString_ShouldReturnCorrectJson()
+        //{
+        //    var originalJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
+        //    {
+        //        TableNumber = 4
+        //    });
+        //    var sut = CreateSut(originalJson);
 
-            sut.TableNumber = 5;
-            var expectedJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
-            {
-                TableNumber = 5
-            });
-            string expectedJsonString = JObject.Parse(expectedJson).ToString();
-            sut.ToJsonString().Should().Be(expectedJsonString);
-        }
+        //    sut.TableNumber = 5;
+        //    var expectedJson = JsonConvert.SerializeObject(new RestaurantDocument("1")
+        //    {
+        //        TableNumber = 5
+        //    });
+        //    string expectedJsonString = JObject.Parse(expectedJson).ToString();
+        //    sut.ToJsonString().Should().Be(expectedJsonString);
+        //}
 
         [Fact]
         public void WhenJsonContainsUnknownProperties_ShouldNotBeLost()

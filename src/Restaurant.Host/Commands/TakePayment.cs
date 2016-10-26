@@ -2,7 +2,7 @@
 
 namespace Restaurant.Host.Commands
 {
-    internal class TakePayment : MessageBase
+    public class TakePayment : MessageBase
     {
         public RestaurantDocument Order { get; }
 
