@@ -1,18 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using Restaurant.Host.Documents;
 
 namespace Restaurant.Host
 {
-    internal class MonitorableQueueThreadHandler<T> : 
+    internal class QueueThreadedHandler<T> : 
         IOrderHandler<T>, IStartable, IMonitorableQueue where T:MessageBase
     {
         private readonly IOrderHandler<T> _orderHandler;
         private readonly ConcurrentQueue<T> _orderQueue;
         private Thread _thread;
 
-        public MonitorableQueueThreadHandler(IOrderHandler<T> orderHandler)
+        public QueueThreadedHandler(IOrderHandler<T> orderHandler)
         {
             _orderHandler = orderHandler;
             _orderQueue = new ConcurrentQueue<T>();
@@ -45,11 +44,5 @@ namespace Restaurant.Host
             _thread.Start();
         }
 
-    }
-
-    internal interface IMonitorableQueue
-    {
-        int Count { get; }
-        string Name { get; }
     }
 }

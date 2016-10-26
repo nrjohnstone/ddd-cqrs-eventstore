@@ -65,7 +65,8 @@
     <Compile Include="Publishers\IPublisher.cs" />
     <Compile Include="Publishers\TopicPublisher.cs" />
     <Compile Include="QueueMonitor.cs" />
-    <Compile Include="QueueThreadHandler.cs" />
+    <Compile Include="QueueThreadedHandler.cs" />
+    <Compile Include="IMonitorableQueue.cs" />
     <Compile Include="Documents\RestaurantDocument.cs" />
     <Compile Include="Actors\Waiter.cs" />
     <Compile Include="TimeToLiveHandler.cs" />
