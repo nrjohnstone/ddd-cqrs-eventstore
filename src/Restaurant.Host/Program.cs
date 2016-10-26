@@ -4,6 +4,7 @@ using System.Threading;
 using Restaurant.Host.Actors;
 using Restaurant.Host.Dispatchers;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Events;
 using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host
@@ -34,7 +35,7 @@ namespace Restaurant.Host
             var cookHandlers = CreateCooks();
 
             var dispatcher = new BalancedRoundRobin<OrderPlaced>(cookHandlers);
-            var cooksDispatcherQueue = new MonitorableQueueThreadHandler<OrderPlaced>(dispatcher);
+            var cooksDispatcherQueue = new QueueThreadedHandler<OrderPlaced>(dispatcher);
             
             _startables.Add(cooksDispatcherQueue);
 
@@ -93,7 +94,7 @@ namespace Restaurant.Host
             Console.WriteLine($"Steve dropped messages {_cookSteve.TotalOrdersDropped}");
         }
 
-        private static MonitorableQueueThreadHandler<OrderPlaced>[] CreateCooks()
+        private static QueueThreadedHandler<OrderPlaced>[] CreateCooks()
         {
             _cookBob = new TimeToLiveHandler<OrderPlaced>(
                 new Cook("Bob",
@@ -116,9 +117,9 @@ namespace Restaurant.Host
             return queueThreadHandlers;
         }
 
-        private static MonitorableQueueThreadHandler<T> CreateQueueThreadHandler<T>(IOrderHandler<T> cashier) where T : MessageBase
+        private static QueueThreadedHandler<T> CreateQueueThreadHandler<T>(IOrderHandler<T> cashier) where T : MessageBase
         {
-            var cashierThread = new MonitorableQueueThreadHandler<T>(cashier);
+            var cashierThread = new QueueThreadedHandler<T>(cashier);
             _startables.Add(cashierThread);
             return cashierThread;
         }
@@ -145,8 +146,4 @@ namespace Restaurant.Host
         }
     }
 
-    public static class Events
-    {
-        public const string OrderCreated = nameof(Events.OrderCreated);
-    }
 }

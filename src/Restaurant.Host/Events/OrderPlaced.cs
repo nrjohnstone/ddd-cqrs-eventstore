@@ -1,7 +1,7 @@
 using System;
 using Restaurant.Host.Documents;
 
-namespace Restaurant.Host.Actors
+namespace Restaurant.Host.Events
 {
     internal class OrderPlaced : MessageBase, ITimeToLive
     {

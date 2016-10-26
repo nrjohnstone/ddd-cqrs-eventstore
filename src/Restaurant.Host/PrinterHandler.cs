@@ -2,6 +2,7 @@
 using System.Collections;
 using Restaurant.Host.Actors;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Events;
 
 namespace Restaurant.Host
 {

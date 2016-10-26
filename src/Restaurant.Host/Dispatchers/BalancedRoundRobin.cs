@@ -7,9 +7,9 @@ namespace Restaurant.Host.Dispatchers
 {
     internal class BalancedRoundRobin<T> : IOrderHandler<T> where T : MessageBase
     {
-        private readonly IEnumerable<MonitorableQueueThreadHandler<T>> _queueThreadHandlers;
+        private readonly IEnumerable<QueueThreadedHandler<T>> _queueThreadHandlers;
 
-        public BalancedRoundRobin(IEnumerable<MonitorableQueueThreadHandler<T>> queueThreadHandlers)
+        public BalancedRoundRobin(IEnumerable<QueueThreadedHandler<T>> queueThreadHandlers)
         {
             _queueThreadHandlers = queueThreadHandlers;
         }

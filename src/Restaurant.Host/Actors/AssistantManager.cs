@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading;
 using Restaurant.Host.Documents;
+using Restaurant.Host.Events;
 using Restaurant.Host.Publishers;
 
 namespace Restaurant.Host.Actors
